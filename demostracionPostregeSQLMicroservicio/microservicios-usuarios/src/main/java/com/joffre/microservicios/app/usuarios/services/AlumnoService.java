@@ -1,17 +1,8 @@
 package com.joffre.microservicios.app.usuarios.services;
 
-import java.util.Optional;
+import com.joffre.microservicios.commons.services.CommonService;
+import com.joffre.microservicios.commonsalumnos.models.entity.Alumno;
 
-import com.joffre.microservicios.app.usuarios.entity.Alumno;
+public interface AlumnoService extends CommonService<Alumno> {
 
-public interface AlumnoService {
-	
-	public Iterable<Alumno> findALl();
-	
-	public Optional<Alumno> findById(Long id);
-	
-    public Alumno save(Alumno alumno);
-    
-    public void deleteById(long id);
-    
 }

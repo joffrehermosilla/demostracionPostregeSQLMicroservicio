@@ -1,56 +1,34 @@
 package com.joffre.microservicios.app.usuarios.controllers;
 
+import java.io.IOException;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.joffre.microservicios.app.usuarios.entity.Alumno;
 import com.joffre.microservicios.app.usuarios.services.AlumnoService;
+import com.joffre.microservicios.commons.controllers.CommonController;
+import com.joffre.microservicios.commonsalumnos.models.entity.Alumno;
 
 @RestController
-public class AlumnoController {
-
-	@Autowired
-	private AlumnoService service;
-
-	@GetMapping
-	public ResponseEntity<?> listar() {
-
-		return ResponseEntity.ok().body(service.findALl());
-
-	}
-
-	@GetMapping("/id")
-	public ResponseEntity<?> ver(@PathVariable Long id) {
-
-		Optional<Alumno> o = service.findById(id);
-		if (!o.isPresent()) {
-			return ResponseEntity.notFound().build();
-		}
-
-		return ResponseEntity.ok(o.get());
-	}
-
-	@PostMapping
-	public ResponseEntity<?> crear(@RequestBody Alumno alumno) {
-
-		Alumno alumnoDb = service.save(alumno);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(alumnoDb);
-
-	}
+public class AlumnoController extends CommonController<Alumno, AlumnoService> {
 
 	@PutMapping("/{id}")
-	public ResponseEntity<?> editar(@RequestBody Alumno alumno, @PathVariable Long id) {
+	public ResponseEntity<?> editar(@Valid @RequestBody Alumno alumno, BindingResult result, @PathVariable Long id) {
+		if (result.hasErrors()) {
+			return this.validar(result);
+		}
+
 		Optional<Alumno> o = service.findById(id);
 		if (!o.isPresent()) {
 			return ResponseEntity.notFound().build();
@@ -65,12 +43,41 @@ public class AlumnoController {
 
 	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> eliminar(@PathVariable Long id) {
-		service.deleteById(id);
+	@PutMapping("/editar-con-foto/{id}")
+	public ResponseEntity<?> editarConFoto(@Valid Alumno alumno, BindingResult result, @PathVariable Long id,
+			@RequestParam MultipartFile archivo) throws IOException {
 
-		return ResponseEntity.noContent().build();
+		if (result.hasErrors()) {
+			return this.validar(result);
+		}
 
+		Optional<Alumno> o = service.findById(id);
+		if (!o.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Alumno alumnoDb = o.get();
+		alumnoDb.setNombre(alumno.getNombre());
+		alumnoDb.setApellido(alumno.getApellido());
+		alumnoDb.setEmail(alumno.getEmail());
+		if (!archivo.isEmpty()) {
+			alumnoDb.setFoto(archivo.getBytes());
+		}
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(service.save(alumnoDb));
+
+	}
+
+	@PostMapping("/crear-con-foto")
+	public ResponseEntity<?> crearconFoto(@Valid Alumno alumno, BindingResult result,
+			@RequestParam MultipartFile archivo) throws IOException {
+		// TODO Auto-generated method stub
+
+		if (!archivo.isEmpty()) {
+			alumno.setFoto(archivo.getBytes());
+		}
+
+		return super.crear(alumno, result);
 	}
 
 }

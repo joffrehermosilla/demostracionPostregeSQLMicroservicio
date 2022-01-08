@@ -1,4 +1,4 @@
-package com.joffre.microservicios.app.usuarios.entity;
+package com.joffre.microservicios.commonsalumnos.models.entity;
 
 import java.util.Date;
 import javax.persistence.Column;
@@ -6,34 +6,56 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name="alumnos")
+@Table(name = "alumnos")
 public class Alumno {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+    
+	@NotEmpty
 	private String nombre;
+	@NotEmpty
 	private String apellido;
+	@NotEmpty
+	@Email
 	private String email;
 
-	@Column(name="crate_at")
+	@Column(name = "crate_at")
 	private Date createAt;
-	
-	
+
 	@PrePersist
 	@Temporal(TemporalType.TIMESTAMP)
 	public void prePersist() {
 		this.createAt = new Date();
 	}
-	
-	
+
+	@Lob
+	@JsonIgnore
+	private byte[] foto;
+
+	public Integer getFotoHashCode() {
+		return (this.foto != null) ? foto.hashCode() : null;
+	}
+
+	public byte[] getFoto() {
+		return foto;
+	}
+
+	public void setFoto(byte[] foto) {
+		this.foto = foto;
+	}
 
 	public Long getId() {
 		return id;
@@ -74,8 +96,5 @@ public class Alumno {
 	public void setCreateAt(Date createAt) {
 		this.createAt = createAt;
 	}
-	
-	
-	
 
 }

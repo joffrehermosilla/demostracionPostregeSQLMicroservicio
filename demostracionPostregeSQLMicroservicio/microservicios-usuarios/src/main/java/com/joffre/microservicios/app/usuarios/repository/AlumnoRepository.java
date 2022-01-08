@@ -1,9 +1,9 @@
 package com.joffre.microservicios.app.usuarios.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-import com.joffre.microservicios.app.usuarios.entity.Alumno;
+import com.joffre.microservicios.commonsalumnos.models.entity.Alumno;
 
-public interface AlumnoRepository extends CrudRepository<Alumno, Long> {
+public interface AlumnoRepository extends PagingAndSortingRepository<Alumno, Long> {
 
 }
