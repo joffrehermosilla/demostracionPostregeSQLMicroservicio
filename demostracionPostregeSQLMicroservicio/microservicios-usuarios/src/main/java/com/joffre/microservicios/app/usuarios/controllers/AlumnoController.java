@@ -16,11 +16,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import com.joffre.microservicios.app.usuarios.services.AlumnoService;
 import com.joffre.microservicios.commons.alumnos.models.entity.Alumno;
 import com.joffre.microservicios.commons.controllers.CommonController;
 import com.joffre.microservicios.commons.utileria.Utileria;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
+
+
+
 
 @RestController
 public class AlumnoController extends CommonController<Alumno, AlumnoService> {
@@ -45,30 +51,28 @@ public class AlumnoController extends CommonController<Alumno, AlumnoService> {
 
 	}
 
-	@PutMapping("/editar-con-foto/{id}")
-	public ResponseEntity<?> editarConFoto(@Valid Alumno alumno, BindingResult result, @PathVariable Long id,
-			@RequestParam MultipartFile archivo) throws IOException {
-
-		if (result.hasErrors()) {
-			return this.validar(result);
-		}
-
-		Optional<Alumno> o = service.findById(id);
-		if (!o.isPresent()) {
-			return ResponseEntity.notFound().build();
-		}
-
-		Alumno alumnoDb = o.get();
-		alumnoDb.setNombre(alumno.getNombre());
-		alumnoDb.setApellido(alumno.getApellido());
-		alumnoDb.setEmail(alumno.getEmail());
-		if (!archivo.isEmpty()) {
-			alumnoDb.setFoto(archivo.getBytes());
-		}
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(service.save(alumnoDb));
-
-	}
+	
+	  @PutMapping("/editar-con-foto/{id}") public ResponseEntity<?>
+	  editarConFoto(@Valid Alumno alumno, BindingResult result, @PathVariable Long
+	  id,
+	  
+	  @RequestParam MultipartFile archivo) throws IOException {
+	  
+	  if (result.hasErrors()) { return this.validar(result); }
+	  
+	  Optional<Alumno> o = service.findById(id); if (!o.isPresent()) { return
+	  ResponseEntity.notFound().build(); }
+	  
+	  Alumno alumnoDb = o.get(); alumnoDb.setNombre(alumno.getNombre());
+	  alumnoDb.setApellido(alumno.getApellido());
+	  alumnoDb.setEmail(alumno.getEmail()); if (!archivo.isEmpty()) {
+	  alumnoDb.setFoto(archivo.getBytes()); }
+	  
+	  return
+	  ResponseEntity.status(HttpStatus.CREATED).body(service.save(alumnoDb));
+	  
+	  }
+	 
 
 	@PostMapping("/crear-con-foto")
 	public ResponseEntity<?> crearConFoto(@Valid Alumno alumno, BindingResult result,
@@ -81,6 +85,7 @@ public class AlumnoController extends CommonController<Alumno, AlumnoService> {
 
 		return super.crear(alumno, result);
 	}
+
 	@PostMapping("/crear-con-fotoruta")
 	public ResponseEntity<?> crearConFotoRuta(@Valid Alumno alumno, BindingResult result,
 			@RequestParam MultipartFile archivo, HttpServletRequest request) throws IOException {
@@ -101,4 +106,51 @@ public class AlumnoController extends CommonController<Alumno, AlumnoService> {
 		return super.crear(alumno, result);
 	}
 
+
+	@PutMapping("/editar-con-fotoruta/{id}")
+	public ResponseEntity<?> editarConFotoRuta(@Valid Alumno alumno, BindingResult result, @PathVariable Long id,
+			@RequestParam MultipartFile archivo, HttpServletRequest request) throws IOException {
+
+		if (result.hasErrors()) {
+			return this.validar(result);
+		}
+
+		Optional<Alumno> o = service.findById(id);
+
+		if (!o.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Alumno alumnoDb = o.get();
+
+		alumnoDb.setNombre(alumno.getNombre());
+		alumnoDb.setApellido(alumno.getApellido());
+		alumnoDb.setEmail(alumno.getEmail());
+		if (!archivo.isEmpty()) {
+			alumno.setFoto(archivo.getBytes());
+			String rutax = "/resources/images/usuarios/" + alumno.getId();
+			System.out.println("rutax: " + rutax);
+			String nombreImagen = Utileria.guardarImagenPlus(archivo, request, rutax);
+			alumno.setRutafoto(nombreImagen);
+
+		}
+		return ResponseEntity.status(HttpStatus.CREATED).body(service.save(alumnoDb));
+	}
+
+	
+	@GetMapping("/uploads/img/{id}")
+	public ResponseEntity<?> verFoto(@PathVariable Long id) {
+
+		Optional<Alumno> o = service.findById(id);
+
+		if (!o.isPresent() || o.get().getFoto() == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		Resource imagen = new ByteArrayResource(o.get().getFoto());
+
+		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imagen);
+
+	}
+	
 }
