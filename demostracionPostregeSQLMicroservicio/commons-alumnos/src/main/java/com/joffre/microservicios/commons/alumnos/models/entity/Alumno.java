@@ -1,4 +1,4 @@
-package com.joffre.microservicios.commonsalumnos.models.entity;
+package com.joffre.microservicios.commons.alumnos.models.entity;
 
 import java.util.Date;
 import javax.persistence.Column;
@@ -44,6 +44,9 @@ public class Alumno {
 	@Lob
 	@JsonIgnore
 	private byte[] foto;
+	
+	@JsonIgnore
+	private String rutafoto;
 
 	public Integer getFotoHashCode() {
 		return (this.foto != null) ? foto.hashCode() : null;
@@ -97,4 +100,13 @@ public class Alumno {
 		this.createAt = createAt;
 	}
 
+	public String getRutafoto() {
+		return rutafoto;
+	}
+
+	public void setRutafoto(String rutafoto) {
+		this.rutafoto = rutafoto;
+	}
+
+	
 }

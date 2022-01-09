@@ -3,6 +3,7 @@ package com.joffre.microservicios.app.usuarios.controllers;
 import java.io.IOException;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -17,8 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.joffre.microservicios.app.usuarios.services.AlumnoService;
+import com.joffre.microservicios.commons.alumnos.models.entity.Alumno;
 import com.joffre.microservicios.commons.controllers.CommonController;
-import com.joffre.microservicios.commonsalumnos.models.entity.Alumno;
+import com.joffre.microservicios.commons.utileria.Utileria;
 
 @RestController
 public class AlumnoController extends CommonController<Alumno, AlumnoService> {
@@ -69,12 +71,31 @@ public class AlumnoController extends CommonController<Alumno, AlumnoService> {
 	}
 
 	@PostMapping("/crear-con-foto")
-	public ResponseEntity<?> crearconFoto(@Valid Alumno alumno, BindingResult result,
-			@RequestParam MultipartFile archivo) throws IOException {
+	public ResponseEntity<?> crearConFoto(@Valid Alumno alumno, BindingResult result,
+			@RequestParam MultipartFile archivo, HttpServletRequest request) throws IOException {
 		// TODO Auto-generated method stub
 
 		if (!archivo.isEmpty()) {
 			alumno.setFoto(archivo.getBytes());
+		}
+
+		return super.crear(alumno, result);
+	}
+	@PostMapping("/crear-con-fotoruta")
+	public ResponseEntity<?> crearConFotoRuta(@Valid Alumno alumno, BindingResult result,
+			@RequestParam MultipartFile archivo, HttpServletRequest request) throws IOException {
+
+		int totalusuario = service.lastcode() + 1;
+
+		if (!archivo.isEmpty()) {
+			// usuario.setFoto(archivo.getBytes());
+
+			String rutax = "/resources/images/usuarios/" + totalusuario;
+			System.out.println("rutax: " + rutax);
+			String nombreImagen = Utileria.guardarImagenPlus(archivo, request, rutax);
+
+			alumno.setRutafoto(nombreImagen);
+
 		}
 
 		return super.crear(alumno, result);
